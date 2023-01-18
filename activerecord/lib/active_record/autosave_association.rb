@@ -193,7 +193,7 @@ module ActiveRecord
         # before actually defining them.
         def add_autosave_association_callbacks(reflection)
           save_method = :"autosave_associated_records_for_#{reflection.name}"
-
+          
           if reflection.collection?
             around_save :around_save_collection_association
 
@@ -223,6 +223,7 @@ module ActiveRecord
 
         def define_autosave_validation_callbacks(reflection)
           validation_method = :"validate_associated_records_for_#{reflection.name}"
+          
           if reflection.validate? && !method_defined?(validation_method)
             if reflection.collection?
               method = :validate_collection_association
@@ -276,7 +277,12 @@ module ActiveRecord
     # Returns whether or not this record has been changed in any way (including whether
     # any of its nested autosave associations are likewise changed)
     def changed_for_autosave?
-      new_record? || has_changes_to_save? || marked_for_destruction? || nested_records_changed_for_autosave?
+      # Quando deixei true, 
+      # os errors de validação que deveriam aparecer, apareceram, 
+      # ou seja, o changed? realmente está influenciando na validação?
+      # true
+      # puts "changed_for_autosave? #{changed?}"
+      new_record? || has_changes_to_save? ||  marked_for_destruction? || nested_records_changed_for_autosave?
     end
 
     private
@@ -287,7 +293,8 @@ module ActiveRecord
         if new_record || custom_validation_context?
           association && association.target
         elsif autosave
-          association.target.find_all(&:changed_for_autosave?)
+          # puts "Test de uso do raw value: #{association.target.find_all(&:changed_raw_value?)}"
+          association.target.find_all(&:changed_for_autosave?) + association.target.find_all(&:changed_raw_value?)
         else
           association.target.find_all(&:new_record?)
         end
@@ -341,6 +348,10 @@ module ActiveRecord
 
         unless valid = record.valid?(context)
           if reflection.options[:autosave]
+            
+            # puts "reflection.options[:autosave] = #{reflection.options[:autosave]}"
+            # puts "valid = #{valid}"
+
             indexed_attribute = !index.nil? && (reflection.options[:index_errors] || ActiveRecord.index_nested_attribute_errors)
 
             record.errors.group_by_attribute.each { |attribute, errors|
@@ -373,7 +384,7 @@ module ActiveRecord
       def around_save_collection_association
         previously_new_record_before_save = (@new_record_before_save ||= false)
         @new_record_before_save = !previously_new_record_before_save && new_record?
-
+        
         yield
       ensure
         @new_record_before_save = previously_new_record_before_save

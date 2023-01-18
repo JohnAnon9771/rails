@@ -232,6 +232,10 @@ module ActiveModel
       mutations_from_database.changes
     end
 
+    def changed_raw_value? # :nodoc:
+      mutations_from_database.any_raw_value_changes?
+    end
+
     # Returns a hash of attributes that were changed before the model was saved.
     #
     #   person.name # => "bob"
