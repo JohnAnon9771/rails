@@ -67,8 +67,7 @@ module ActiveModel
       changed_from_assignment? || changed_in_place?
     end
 
-    def changed_raw_value?
-      puts "changed_raw_value? #{value_before_type_cast} != #{value}"
+    def raw_changed?
       value_before_type_cast != value
     end
 
