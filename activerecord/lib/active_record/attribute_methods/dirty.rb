@@ -157,8 +157,6 @@ module ActiveRecord
 
       # Will the next call to +save+ have any changes to persist?
       def has_changes_to_save?
-        # puts "has_changes_to_save?: #{mutations_from_database.any_changes?}"
-        # puts "mutations_from_database: #{mutations_from_database.changes}"
         mutations_from_database.any_changes?
       end
 

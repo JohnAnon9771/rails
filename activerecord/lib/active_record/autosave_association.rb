@@ -343,9 +343,6 @@ module ActiveRecord
         unless valid = record.valid?(context)
           if reflection.options[:autosave]
 
-            # puts "reflection.options[:autosave] = #{reflection.options[:autosave]}"
-            # puts "valid = #{valid}"
-
             indexed_attribute = !index.nil? && (reflection.options[:index_errors] || ActiveRecord.index_nested_attribute_errors)
 
             record.errors.group_by_attribute.each { |attribute, errors|
